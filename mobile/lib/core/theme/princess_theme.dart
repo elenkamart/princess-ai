@@ -50,13 +50,19 @@ class PrincessColors {
   static const Color scrim = Color(0x732B2147);
 }
 
-/// The six occasions and their card tint + text/icon color.
+/// The occasions and their card tint + text/icon color.
 enum PrincessOccasion {
   school('School', PrincessColors.skyTint, PrincessColors.skyDeep),
   park('Park', PrincessColors.mintTint, PrincessColors.mintDeep),
-  rainy('Rainy day', PrincessColors.rainTint, PrincessColors.rainDeep),
   beach('Beach', PrincessColors.sandTint, PrincessColors.sandDeep),
+  sports('Sports', PrincessColors.mintTint, PrincessColors.mintDeep),
+  snowplay('Snow day', PrincessColors.rainTint, PrincessColors.rainDeep),
+  swimming('Swimming', PrincessColors.skyTint, PrincessColors.skyDeep),
+  ballet('Ballet', PrincessColors.berryTint, PrincessColors.berryDeep),
   party('Party', PrincessColors.berryTint, PrincessColors.berryDeep),
+  birthday('Birthday', PrincessColors.sandTint, PrincessColors.sandDeep),
+  halloween('Halloween', PrincessColors.coralTint, PrincessColors.coralDeep),
+  christmas('Christmas', PrincessColors.mintTint, PrincessColors.mintDeep),
   bedtime('Bedtime', PrincessColors.lilacTint, PrincessColors.lilacDeep);
 
   const PrincessOccasion(this.label, this.tint, this.deep);

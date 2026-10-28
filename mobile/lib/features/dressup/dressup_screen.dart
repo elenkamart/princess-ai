@@ -3,7 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/princess_theme.dart';
 import 'dressup_art_data.dart';
+import 'dressup_calendar.dart';
 import 'dressup_game.dart';
+import 'dressup_grownups.dart';
 import 'dressup_progress.dart';
 import 'dressup_widgets.dart';
 
@@ -17,8 +19,6 @@ class DressUpScreen extends StatefulWidget {
 
 class _DressUpScreenState extends State<DressUpScreen> {
   static const _when = ['Morning', 'Afternoon', 'Evening'];
-  static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  static const _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   final DateTime _today = DateTime.now();
   DressUpProgress? _progress;
@@ -33,7 +33,9 @@ class _DressUpScreenState extends State<DressUpScreen> {
   void initState() {
     super.initState();
     DressUpProgress.load().then((p) {
-      if (mounted) setState(() => _progress = p);
+      if (!mounted) return;
+      setState(() => _progress = p);
+      if (p.city != null) p.refreshWeather();
     });
   }
 
@@ -69,7 +71,7 @@ class _DressUpScreenState extends State<DressUpScreen> {
   void _check() {
     final p = _progress!;
     final r = p.day(_today);
-    final res = judge(r.outfits[_cur], r.plan[_cur]);
+    final res = judge(r.outfits[_cur], r.plan[_cur], r.weather.kind);
     final before = r.stars[_cur];
     setState(() {
       _mood = res.mood;
@@ -117,6 +119,65 @@ class _DressUpScreenState extends State<DressUpScreen> {
         barrierColor: PrincessColors.scrim,
         builder: (_) => _LookSheet(progress: _progress!),
       );
+
+  Future<void> _openCalendar() async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DressUpCalendar(progress: _progress!, today: _today)));
+    if (mounted) setState(_resetTalk);
+  }
+
+  Future<void> _openGrownUps() async {
+    await openGrownUps(context, _progress!, _today);
+    if (mounted) setState(_resetTalk);
+  }
+
+  Widget _weatherChip(DressUpProgress p) {
+    final w = p.day(_today).weather;
+    final (String icon, String text) = switch (p.weatherStatus) {
+      WeatherStatus.noCity => ('pin', 'Set the weather'),
+      WeatherStatus.loading when !w.known => ('nice', 'Checking weather…'),
+      WeatherStatus.failed when !w.known => ('cold', 'No weather. Tap to retry'),
+      _ => (w.kind.icon, w.known ? w.short : w.kind.label),
+    };
+    final place = p.city?.name;
+    return Semantics(
+      button: true,
+      label: 'Weather: $text${place != null ? ' in $place' : ''}',
+      excludeSemantics: true,
+      child: Material(
+        color: PrincessColors.surface,
+        shape: const StadiumBorder(side: BorderSide(color: PrincessColors.border, width: 3)),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: switch (p.weatherStatus) {
+            WeatherStatus.noCity => _openGrownUps,
+            WeatherStatus.failed => p.refreshWeather,
+            _ => null,
+          },
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: PrincessSizes.tapMin),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: PrincessSpace.s16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GameIcon(icon, size: 28, color: PrincessColors.skyDeep),
+                  const SizedBox(width: PrincessSpace.s8),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(text, style: PrincessText.tab.copyWith(color: PrincessColors.ink)),
+                      if (place != null) Text(place, style: PrincessText.caption.copyWith(fontSize: 13)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +232,7 @@ class _DressUpScreenState extends State<DressUpScreen> {
   }
 
   Widget _header(DressUpProgress p, bool narrow) {
-    final date = '${_weekdays[_today.weekday - 1]} ${_today.day} ${_months[_today.month - 1]}';
+    final date = longDate(_today);
     return Wrap(
       spacing: PrincessSpace.s20,
       runSpacing: PrincessSpace.s12,
@@ -197,7 +258,16 @@ class _DressUpScreenState extends State<DressUpScreen> {
           ],
         ),
         WeekStrip(today: _today, isDone: p.isDone, streak: p.streak(_today)),
-        PressButton(label: 'Change look', icon: 'palette', onPressed: _openLook),
+        _weatherChip(p),
+        Wrap(
+          spacing: PrincessSpace.s12,
+          runSpacing: PrincessSpace.s12,
+          children: [
+            PressButton(label: 'Calendar', icon: 'calendar', onPressed: _openCalendar),
+            PressButton(label: 'Change look', icon: 'palette', onPressed: _openLook),
+            Tooltip(message: 'For grown-ups', child: PressButton(label: 'Grown-ups', icon: 'lock', onPressed: _openGrownUps)),
+          ],
+        ),
       ],
     );
   }
@@ -243,7 +313,10 @@ class _DressUpScreenState extends State<DressUpScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SpeechBubble(text: _message ?? occText.hello, oops: _mood == Mood.oops),
+          SpeechBubble(
+            text: _message ?? [occText.hello, if (occText.outdoor) r.weather.kind.hint].where((s) => s.isNotEmpty).join(' '),
+            oops: _mood == Mood.oops,
+          ),
           const SizedBox(height: 14),
           Center(
             child: ConstrainedBox(
@@ -253,7 +326,7 @@ class _DressUpScreenState extends State<DressUpScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(PrincessRadius.r20),
                   child: SvgPicture.string(
-                    stageSvg(occ, p.look, r.outfits[_cur], _mood),
+                    stageSvg(occ, p.look, r.outfits[_cur], _mood, r.weather.kind),
                     fit: BoxFit.cover,
                     semanticsLabel: 'Lulu dressed for ${occText.name}',
                   ),

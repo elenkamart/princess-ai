@@ -1,4 +1,5 @@
 import 'dressup_art_data.dart';
+import 'dressup_weather.dart';
 
 /// Lulu's face for the current moment: dressing, pleased, or not quite right.
 enum Mood { ok, happy, oops }
@@ -29,8 +30,28 @@ class Look {
   }
 }
 
+/// A month and day that repeats every year, like a birthday.
+class MonthDay {
+  const MonthDay(this.month, this.day);
+
+  final int month;
+  final int day;
+
+  bool matches(DateTime d) => d.month == month && d.day == day;
+
+  Map<String, int> toJson() => {'month': month, 'day': day};
+
+  static MonthDay? fromJson(Object? json) {
+    if (json is! Map || json['month'] is! int || json['day'] is! int) return null;
+    return MonthDay(json['month'] as int, json['day'] as int);
+  }
+}
+
 /// slot id -> item id
 typedef Outfit = Map<String, String>;
+
+/// Occasions a grown-up can put on a calendar day.
+const kSpecialOccasions = ['party', 'birthday', 'sports', 'swimming', 'ballet', 'halloween', 'christmas'];
 
 class Judgement {
   const Judgement({required this.complete, required this.stars, required this.wrong, required this.mood, required this.message});
@@ -67,7 +88,36 @@ Outfit wear(Outfit outfit, DressUpItem item) {
   return next;
 }
 
-Judgement judge(Outfit outfit, String occasionId) {
+enum _Fit { ok, notFor, tooHot, tooCold }
+
+_Fit _fit(DressUpItem it, String occasionId, WeatherKind weather) {
+  final outdoor = kOccasions[occasionId]!.outdoor;
+  final chilly = weather == WeatherKind.cold || weather == WeatherKind.snow;
+  if (outdoor && weather == WeatherKind.hot && it.tags.contains('warm')) return _Fit.tooHot;
+  if (outdoor && chilly && it.tags.contains('cool')) return _Fit.tooCold;
+  if (it.fits.contains(occasionId)) return _Fit.ok;
+  if (outdoor && weather == WeatherKind.rain && it.tags.contains('rain')) return _Fit.ok;
+  if (outdoor && chilly && it.tags.contains('warm')) return _Fit.ok;
+  if (outdoor && weather == WeatherKind.hot && it.tags.contains('cool')) return _Fit.ok;
+  return _Fit.notFor;
+}
+
+/// Whether [item] suits [occasionId] in [weather].
+bool suits(DressUpItem item, String occasionId, WeatherKind weather) => _fit(item, occasionId, weather) == _Fit.ok;
+
+/// What the weather still asks for, or null when the outfit is ready for it.
+String? _weatherNeed(Iterable<DressUpItem> worn, String occasionId, WeatherKind weather) {
+  if (!kOccasions[occasionId]!.outdoor) return null;
+  bool has(String tag, [String? slot]) => worn.any((it) => it.tags.contains(tag) && (slot == null || it.slot == slot));
+  return switch (weather) {
+    WeatherKind.rain when !has('rain') => 'It’s raining! I need something to keep me dry.',
+    WeatherKind.snow when !(has('warm', 'coat') && has('warm', 'shoes')) => 'Brr, it’s snowing! I need a warm coat and snow boots.',
+    WeatherKind.cold when !has('warm') => 'Brr, it’s cold! I need something warm.',
+    _ => null,
+  };
+}
+
+Judgement judge(Outfit outfit, String occasionId, [WeatherKind weather = WeatherKind.nice]) {
   final occ = kOccasions[occasionId]!;
   final missing = <String>[
     if (!outfit.containsKey('dress') && !outfit.containsKey('top')) 'a top',
@@ -78,27 +128,58 @@ Judgement judge(Outfit outfit, String occasionId) {
     return Judgement(complete: false, stars: 0, wrong: const [], mood: Mood.oops, message: 'I still need ${missing.join(' and ')}!');
   }
   final worn = outfit.values.map(itemById).whereType<DressUpItem>().toList();
-  final wrong = worn.where((it) => !it.fits.contains(occasionId)).toList();
-  final good = worn.length - wrong.length;
-  if (wrong.isEmpty) {
-    return good >= 3
-        ? Judgement(complete: true, stars: 3, wrong: const [], mood: Mood.happy, message: occ.yay)
-        : const Judgement(complete: true, stars: 2, wrong: [], mood: Mood.happy, message: 'Nice! Can you add one more thing?');
+  final fits = {for (final it in worn) it: _fit(it, occasionId, weather)};
+  final wrong = worn.where((it) => fits[it] != _Fit.ok).toList();
+
+  if (wrong.isNotEmpty) {
+    final w = wrong.first;
+    final verb = w.plural ? 'are' : 'is';
+    final name = w.name.toLowerCase();
+    final message = switch (fits[w]!) {
+      _Fit.tooHot => 'Phew! The $name $verb too hot today.',
+      _Fit.tooCold => 'Brr! The $name $verb too cold today.',
+      _ => () {
+          final swap = kItems.where((it) => it.slot == w.slot && suits(it, occasionId, weather)).firstOrNull;
+          return 'The $name $verb not for ${occ.name.toLowerCase()}.${swap != null ? ' Try the ${swap.name.toLowerCase()}!' : ' Take it off!'}';
+        }(),
+    };
+    return Judgement(complete: true, stars: 1, wrong: wrong, mood: Mood.oops, message: message);
   }
-  final w = wrong.first;
-  final swap = kItems.where((it) => it.slot == w.slot && it.fits.contains(occasionId)).firstOrNull;
-  final message = 'The ${w.name.toLowerCase()} ${w.plural ? 'are' : 'is'} not for ${occ.name.toLowerCase()}.'
-      '${swap != null ? ' Try the ${swap.name.toLowerCase()}!' : ' Take it off!'}';
-  return Judgement(complete: true, stars: 1, wrong: wrong, mood: Mood.oops, message: message);
+  final need = _weatherNeed(worn, occasionId, weather);
+  if (need != null) {
+    return Judgement(complete: true, stars: 1, wrong: const [], mood: Mood.oops, message: need);
+  }
+  return worn.length >= 3
+      ? Judgement(complete: true, stars: 3, wrong: const [], mood: Mood.happy, message: occ.yay)
+      : const Judgement(complete: true, stars: 2, wrong: [], mood: Mood.happy, message: 'Nice! Can you add one more thing?');
 }
 
-/// Morning, afternoon and evening occasions for [date]. Same seed as the web game.
-List<String> dayPlan(DateTime date) {
-  final seed = date.year * 372 + (date.month - 1) * 31 + date.day;
-  if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
-    return [seed.isOdd ? 'beach' : 'park', 'party', 'bedtime'];
-  }
-  return ['school', seed % 3 == 0 ? 'rainy' : 'park', 'bedtime'];
+/// The special occasion on [date], if any: a grown-up's entry wins, then the birthday, then holidays.
+String? specialFor(DateTime date, {MonthDay? birthday, Map<String, String> specials = const {}}) {
+  final custom = specials[dateKey(date)];
+  if (custom != null && kOccasions.containsKey(custom)) return custom;
+  if (birthday != null && birthday.matches(date)) return 'birthday';
+  if (date.month == 10 && date.day == 31) return 'halloween';
+  if (date.month == 12 && (date.day == 24 || date.day == 25)) return 'christmas';
+  return null;
+}
+
+/// Morning, afternoon and evening occasions for [date]. A special day takes the afternoon.
+List<String> dayPlan(DateTime date, {WeatherKind weather = WeatherKind.nice, MonthDay? birthday, Map<String, String> specials = const {}}) {
+  final outside = weather == WeatherKind.snow ? 'snowplay' : 'park';
+  final sunny = weather == WeatherKind.hot ? 'beach' : outside;
+  final plan = switch (date.weekday) {
+    DateTime.monday => ['school', outside],
+    DateTime.tuesday => ['school', 'sports'],
+    DateTime.wednesday => ['school', 'ballet'],
+    DateTime.thursday => ['school', 'swimming'],
+    DateTime.friday => ['school', outside],
+    DateTime.saturday => [sunny, 'party'],
+    _ => ['swimming', sunny],
+  };
+  final special = specialFor(date, birthday: birthday, specials: specials);
+  if (special != null) plan[1] = special;
+  return [...plan, 'bedtime'];
 }
 
 String dateKey(DateTime d) =>
@@ -141,9 +222,11 @@ String characterLayers(Look look, Outfit outfit, Mood mood) {
   return _skin(b.toString(), look);
 }
 
-String stageSvg(String occasionId, Look look, Outfit outfit, Mood mood) =>
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440">${kBackdrops[occasionId]}'
-    '<g transform="translate(80 34)">${characterLayers(look, outfit, mood)}</g></svg>';
+String stageSvg(String occasionId, Look look, Outfit outfit, Mood mood, [WeatherKind weather = WeatherKind.nice]) {
+  final overlay = kOccasions[occasionId]!.outdoor ? kWeatherOverlays[weather.name] ?? '' : '';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440">${kBackdrops[occasionId]}$overlay'
+      '<g transform="translate(80 34)">${characterLayers(look, outfit, mood)}</g></svg>';
+}
 
 String headSvg(Look look) =>
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 6 160 150">${characterLayers(look, const {}, Mood.happy)}</svg>';

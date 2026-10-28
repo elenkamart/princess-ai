@@ -3,26 +3,34 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dressup_art_data.dart';
 import 'dressup_game.dart';
+import 'dressup_weather.dart';
 
-/// One day's three outfits and the best stars earned for each.
+/// One day's three outfits, its weather and the best stars earned for each.
 class DayRecord {
-  DayRecord({required this.plan, List<int>? stars, List<Outfit>? outfits, this.done = false})
+  DayRecord({required this.plan, this.weather = DayWeather.unknown, List<int>? stars, List<Outfit>? outfits, this.done = false})
       : stars = stars ?? [0, 0, 0],
         outfits = outfits ?? [{}, {}, {}];
 
   final List<String> plan;
+  final DayWeather weather;
   final List<int> stars;
   final List<Outfit> outfits;
   bool done;
 
-  Map<String, Object> toJson() => {'plan': plan, 'stars': stars, 'outfits': outfits, 'done': done};
+  bool get started => stars.any((s) => s > 0);
+
+  Map<String, Object> toJson() => {'plan': plan, 'weather': weather.toJson(), 'stars': stars, 'outfits': outfits, 'done': done};
 
   static DayRecord? fromJson(Object? json) {
     if (json is! Map) return null;
     try {
+      final plan = List<String>.from(json['plan'] as List);
+      if (plan.length != 3 || !plan.every(kOccasions.containsKey)) return null;
       return DayRecord(
-        plan: List<String>.from(json['plan'] as List),
+        plan: plan,
+        weather: DayWeather.fromJson(json['weather']),
         stars: List<int>.from(json['stars'] as List),
         outfits: (json['outfits'] as List).map((o) => Map<String, String>.from(o as Map)).toList(),
         done: json['done'] == true,
@@ -33,14 +41,30 @@ class DayRecord {
   }
 }
 
-/// Lulu's look and every day's progress, saved on the device.
+enum WeatherStatus { noCity, loading, ready, failed }
+
+/// Lulu's look, the grown-up settings, the forecast and every day's progress, saved on the device.
 class DressUpProgress extends ChangeNotifier {
-  DressUpProgress(this._prefs) {
-    final raw = _prefs?.getString(_key);
+  DressUpProgress(this._prefs, {WeatherService? weather}) : _weather = weather ?? WeatherService() {
+    final raw = _prefs?.getString(_key) ?? _prefs?.getString('princess-dressup-v1');
     if (raw == null) return;
     try {
       final json = jsonDecode(raw) as Map<String, dynamic>;
       look = Look.fromJson(json['look']);
+      city = City.fromJson(json['city']);
+      birthday = MonthDay.fromJson(json['birthday']);
+      final sp = json['specials'];
+      if (sp is Map) {
+        for (final e in sp.entries) {
+          if (e.value is String && kOccasions.containsKey(e.value)) specials[e.key as String] = e.value as String;
+        }
+      }
+      final fc = json['forecast'];
+      if (fc is Map) {
+        for (final e in fc.entries) {
+          _forecast[e.key as String] = DayWeather.fromJson(e.value);
+        }
+      }
       final days = json['days'];
       if (days is Map) {
         for (final e in days.entries) {
@@ -51,9 +75,10 @@ class DressUpProgress extends ChangeNotifier {
     } catch (_) {
       // Unreadable save: start fresh rather than crash a child's game.
     }
+    if (city != null && _forecast.isNotEmpty) weatherStatus = WeatherStatus.ready;
   }
 
-  static const _key = 'princess-dressup-v1';
+  static const _key = 'princess-dressup-v2';
 
   static Future<DressUpProgress> load() async {
     try {
@@ -64,18 +89,43 @@ class DressUpProgress extends ChangeNotifier {
   }
 
   final SharedPreferences? _prefs;
+  final WeatherService _weather;
   final Map<String, DayRecord> _days = {};
+  final Map<String, DayWeather> _forecast = {};
+
   Look look = const Look();
+  City? city;
+  MonthDay? birthday;
+  final Map<String, String> specials = {};
+  WeatherStatus weatherStatus = WeatherStatus.noCity;
+
+  WeatherService get weatherService => _weather;
+
+  /// Forecast for [date], or the weather saved with that day.
+  DayWeather weatherFor(DateTime date) => _forecast[dateKey(date)] ?? _days[dateKey(date)]?.weather ?? DayWeather.unknown;
 
   bool isDone(DateTime day) => _days[dateKey(day)]?.done ?? false;
 
-  /// Today's record, recreated if the plan rules changed since it was saved.
+  DayRecord? recordFor(DateTime date) => _days[dateKey(date)];
+
+  List<String> planFor(DateTime date) =>
+      _days[dateKey(date)]?.plan ?? dayPlan(date, weather: weatherFor(date).kind, birthday: birthday, specials: specials);
+
+  /// [date]'s record. Until a star is earned it follows the latest weather and special days;
+  /// after that the day stays as the child played it.
   DayRecord day(DateTime date) {
-    final plan = dayPlan(date);
     final k = dateKey(date);
+    final weather = weatherFor(date);
+    final plan = dayPlan(date, weather: weather.kind, birthday: birthday, specials: specials);
     final existing = _days[k];
-    if (existing != null && listEquals(existing.plan, plan)) return existing;
-    return _days[k] = DayRecord(plan: plan);
+    if (existing != null && (existing.started || (listEquals(existing.plan, plan) && existing.weather.kind == weather.kind))) {
+      return existing;
+    }
+    final outfits = [
+      for (var i = 0; i < 3; i++)
+        existing != null && existing.plan[i] == plan[i] ? existing.outfits[i] : <String, String>{},
+    ];
+    return _days[k] = DayRecord(plan: plan, weather: weather, outfits: outfits);
   }
 
   int streak(DateTime today) {
@@ -86,6 +136,47 @@ class DressUpProgress extends ChangeNotifier {
       d = d.subtract(const Duration(days: 1));
     }
     return n;
+  }
+
+  Future<void> refreshWeather() async {
+    final c = city;
+    if (c == null) {
+      weatherStatus = WeatherStatus.noCity;
+      notifyListeners();
+      return;
+    }
+    weatherStatus = WeatherStatus.loading;
+    notifyListeners();
+    try {
+      final fc = await _weather.forecast(c);
+      _forecast
+        ..clear()
+        ..addAll(fc);
+      weatherStatus = WeatherStatus.ready;
+    } catch (_) {
+      weatherStatus = _forecast.isEmpty ? WeatherStatus.failed : WeatherStatus.ready;
+    }
+    _changed();
+  }
+
+  void setCity(City? value) {
+    city = value;
+    _forecast.clear();
+    refreshWeather();
+  }
+
+  void setBirthday(MonthDay? value) {
+    birthday = value;
+    _changed();
+  }
+
+  void setSpecial(DateTime date, String? occasion) {
+    if (occasion == null) {
+      specials.remove(dateKey(date));
+    } else {
+      specials[dateKey(date)] = occasion;
+    }
+    _changed();
   }
 
   void setLook(Look value) {
@@ -110,6 +201,16 @@ class DressUpProgress extends ChangeNotifier {
 
   void _changed() {
     notifyListeners();
-    _prefs?.setString(_key, jsonEncode({'look': look.toJson(), 'days': _days.map((k, v) => MapEntry(k, v.toJson()))}));
+    _prefs?.setString(
+      _key,
+      jsonEncode({
+        'look': look.toJson(),
+        'city': city?.toJson(),
+        'birthday': birthday?.toJson(),
+        'specials': specials,
+        'forecast': _forecast.map((k, v) => MapEntry(k, v.toJson())),
+        'days': _days.map((k, v) => MapEntry(k, v.toJson())),
+      }),
+    );
   }
 }
