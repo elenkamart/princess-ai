@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-const ink = Color(0xFF171717);
-const gold = Color(0xFFC8A96A);
-const beige = Color(0xFFEFE7DD);
-ThemeData buildTheme() => ThemeData(
-  useMaterial3: true,
-  scaffoldBackgroundColor: const Color(0xFFFAF8F6),
-  colorScheme: ColorScheme.fromSeed(seedColor: gold),
-  filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(
-    backgroundColor: ink, foregroundColor: Colors.white, minimumSize: const Size.fromHeight(54),
-  )),
-  cardTheme: const CardThemeData(color: Colors.white, elevation: 0),
-  inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
-);
+
+import '../core/theme/princess_theme.dart';
+
+export '../core/theme/princess_theme.dart';
+
+// Short names kept for the existing src/ screens.
+const ink = PrincessColors.ink;
+const gold = PrincessColors.berry;
+const cream = PrincessColors.canvas;
+const rose = PrincessColors.berryTint;
+const border = PrincessColors.border;
+
+ThemeData buildTheme() => PrincessTheme.light();
