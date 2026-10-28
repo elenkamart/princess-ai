@@ -61,13 +61,16 @@ List<String> timesOfDay(int count) => switch (count) {
     };
 
 class Judgement {
-  const Judgement({required this.complete, required this.stars, required this.wrong, required this.mood, required this.message});
+  const Judgement({required this.complete, required this.stars, required this.wrong, required this.mood, required this.message, this.suggestion});
 
   final bool complete;
   final int stars;
   final List<DressUpItem> wrong;
   final Mood mood;
   final String message;
+
+  /// A piece Lulu asks for to earn the third star.
+  final DressUpItem? suggestion;
 }
 
 DressUpItem? itemById(String id) {
@@ -176,6 +179,7 @@ Judgement judge(Outfit outfit, String occasionId, [WeatherKind weather = Weather
     wrong: const [],
     mood: Mood.happy,
     message: idea == null ? 'Nice! Can you add one more thing?' : 'Nice! Can you add the ${idea.name.toLowerCase()}?',
+    suggestion: idea,
   );
 }
 

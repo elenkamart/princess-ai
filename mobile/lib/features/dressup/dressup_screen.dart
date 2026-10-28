@@ -26,6 +26,9 @@ class _DressUpScreenState extends State<DressUpScreen> {
   Mood _mood = Mood.ok;
   String? _message;
   List<String> _wrongIds = const [];
+
+  /// The piece Lulu just suggested; its tile gets a star until it is worn.
+  String? _hintId;
   int _popKey = 0;
 
   @override
@@ -48,6 +51,7 @@ class _DressUpScreenState extends State<DressUpScreen> {
     _mood = Mood.ok;
     _message = null;
     _wrongIds = const [];
+    _hintId = null;
   }
 
   void _selectOccasion(int i) => setState(() {
@@ -61,6 +65,7 @@ class _DressUpScreenState extends State<DressUpScreen> {
     final wasOn = outfit[item.slot] == item.id;
     setState(() {
       _wrongIds = _wrongIds.where((id) => id != item.id).toList();
+      if (item.id == _hintId) _hintId = null;
       _mood = Mood.ok;
       _message = wasOn ? null : 'Ooh, the ${item.name.toLowerCase()}!';
     });
@@ -76,7 +81,13 @@ class _DressUpScreenState extends State<DressUpScreen> {
       _mood = res.mood;
       _message = res.message;
       _wrongIds = res.wrong.map((w) => w.id).toList();
-      if (res.wrong.isNotEmpty) _tab = res.wrong.first.slot;
+      _hintId = res.suggestion?.id;
+      // Open the closet where the fix is: the piece that doesn't suit, or the one Lulu suggests.
+      if (res.wrong.isNotEmpty) {
+        _tab = res.wrong.first.slot;
+      } else if (res.suggestion != null) {
+        _tab = res.suggestion!.slot;
+      }
       if (res.stars > before) _popKey++;
     });
     if (p.recordStars(_today, _cur, res.stars)) _showSticker();
@@ -381,20 +392,19 @@ class _DressUpScreenState extends State<DressUpScreen> {
             child: Text('Lulu’s closet', style: PrincessText.panelTitle.copyWith(color: PrincessColors.ink)),
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            height: 60,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              itemCount: kSlots.length,
-              separatorBuilder: (_, i) => const SizedBox(width: PrincessSpace.s8),
-              itemBuilder: (_, i) => CategoryTab(
-                slot: kSlots[i],
-                selected: kSlots[i] == _tab,
-                wearing: outfit.containsKey(kSlots[i]),
-                onTap: () => setState(() => _tab = kSlots[i]),
-              ),
-            ),
+          // Tabs wrap onto a second line so every category stays in view; children don't find sideways scrolling.
+          Wrap(
+            spacing: PrincessSpace.s8,
+            runSpacing: PrincessSpace.s8,
+            children: [
+              for (final slot in kSlots)
+                CategoryTab(
+                  slot: slot,
+                  selected: slot == _tab,
+                  wearing: outfit.containsKey(slot),
+                  onTap: () => setState(() => _tab = slot),
+                ),
+            ],
           ),
           const SizedBox(height: 14),
           LayoutBuilder(
@@ -414,7 +424,14 @@ class _DressUpScreenState extends State<DressUpScreen> {
                 itemBuilder: (_, i) {
                   final it = items[i];
                   final on = outfit[it.slot] == it.id;
-                  return ItemTile(item: it, look: p.look, worn: on, nope: on && _wrongIds.contains(it.id), onTap: () => _tapItem(it));
+                  return ItemTile(
+                    item: it,
+                    look: p.look,
+                    worn: on,
+                    nope: on && _wrongIds.contains(it.id),
+                    hint: !on && it.id == _hintId,
+                    onTap: () => _tapItem(it),
+                  );
                 },
               );
             },

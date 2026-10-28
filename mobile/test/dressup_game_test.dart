@@ -15,6 +15,7 @@ void main() {
       final r = judge({'dress': 'nightgown', 'shoes': 'slippers'}, 'bedtime');
       expect(r.stars, 2);
       expect(r.message, 'Nice! Can you add the teddy bear?');
+      expect(r.suggestion?.id, 'teddy');
       expect(judge({'dress': 'nightgown', 'shoes': 'slippers', 'extra': 'teddy'}, 'bedtime').stars, 3);
     });
 

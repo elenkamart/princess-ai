@@ -377,22 +377,25 @@ class CategoryTab extends StatelessWidget {
 
 /// One piece of clothing in the closet grid.
 class ItemTile extends StatelessWidget {
-  const ItemTile({super.key, required this.item, required this.look, required this.worn, required this.nope, required this.onTap});
+  const ItemTile({super.key, required this.item, required this.look, required this.worn, required this.nope, required this.onTap, this.hint = false});
 
   final DressUpItem item;
   final Look look;
   final bool worn;
   final bool nope;
+
+  /// Lulu asked for this piece: it gets a sand fill and a star badge.
+  final bool hint;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = nope ? PrincessColors.coralDeep : worn ? PrincessColors.berry : PrincessColors.border;
-    final fill = nope ? PrincessColors.coralTint : worn ? PrincessColors.surfacePink : PrincessColors.canvas;
+    final borderColor = nope ? PrincessColors.coralDeep : worn ? PrincessColors.berry : hint ? PrincessColors.sandDeep : PrincessColors.border;
+    final fill = nope ? PrincessColors.coralTint : worn ? PrincessColors.surfacePink : hint ? PrincessColors.sandTint : PrincessColors.canvas;
     return Semantics(
       button: true,
       selected: worn,
-      label: '${item.name}${nope ? ', not right for now' : worn ? ', wearing' : ''}',
+      label: '${item.name}${nope ? ', not right for now' : worn ? ', wearing' : hint ? ', Lulu wants this' : ''}',
       excludeSemantics: true,
       child: Stack(
         clipBehavior: Clip.none,
@@ -436,6 +439,7 @@ class ItemTile extends StatelessWidget {
                 child: GameIcon(nope ? 'undo' : 'check', size: 20, color: PrincessColors.onBerry),
               ),
             ),
+          if (hint && !worn) const Positioned(top: -12, right: -10, child: StarIcon(filled: true, size: 38)),
         ],
       ),
     );
