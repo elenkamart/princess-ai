@@ -139,7 +139,7 @@ Judgement judge(Outfit outfit, String occasionId, [WeatherKind weather = Weather
   final missing = <String>[
     if (!outfit.containsKey('dress') && !outfit.containsKey('top')) 'a top',
     if (!outfit.containsKey('dress') && !outfit.containsKey('bottom')) 'something for my legs',
-    if (!outfit.containsKey('shoes')) 'shoes',
+    if (!outfit.containsKey('shoes') && !_barefoot.contains(occasionId)) 'shoes',
   ];
   if (missing.isNotEmpty) {
     return Judgement(complete: false, stars: 0, wrong: const [], mood: Mood.oops, message: 'I still need ${missing.join(' and ')}!');
@@ -166,9 +166,30 @@ Judgement judge(Outfit outfit, String occasionId, [WeatherKind weather = Weather
   if (need != null) {
     return Judgement(complete: true, stars: 1, wrong: const [], mood: Mood.oops, message: need);
   }
-  return worn.length >= 3
-      ? Judgement(complete: true, stars: 3, wrong: const [], mood: Mood.happy, message: occ.yay)
-      : const Judgement(complete: true, stars: 2, wrong: [], mood: Mood.happy, message: 'Nice! Can you add one more thing?');
+  if (worn.length >= 3) {
+    return Judgement(complete: true, stars: 3, wrong: const [], mood: Mood.happy, message: occ.yay);
+  }
+  final idea = _addIdea(outfit, occasionId, weather);
+  return Judgement(
+    complete: true,
+    stars: 2,
+    wrong: const [],
+    mood: Mood.happy,
+    message: idea == null ? 'Nice! Can you add one more thing?' : 'Nice! Can you add the ${idea.name.toLowerCase()}?',
+  );
+}
+
+/// Occasions Lulu goes to in bare feet or socks: shoes are optional there.
+const _barefoot = {'bedtime', 'sleepover'};
+
+/// A piece in a free slot that suits the occasion, extras and hats first.
+DressUpItem? _addIdea(Outfit outfit, String occasionId, WeatherKind weather) {
+  for (final slot in const ['extra', 'hat', 'shoes', 'coat']) {
+    if (outfit.containsKey(slot)) continue;
+    final it = kItems.where((it) => it.slot == slot && suits(it, occasionId, weather)).firstOrNull;
+    if (it != null) return it;
+  }
+  return null;
 }
 
 /// The special occasion on [date], if any: a grown-up's entry wins, then the birthday, then holidays.

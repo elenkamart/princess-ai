@@ -11,10 +11,18 @@ void main() {
       expect(r.mood, Mood.happy);
     });
 
-    test('two fitting pieces get 2 stars and a nudge for one more', () {
-      final r = judge({'dress': 'pajamas', 'shoes': 'slippers'}, 'bedtime');
+    test('two fitting pieces get 2 stars and a named piece to add', () {
+      final r = judge({'dress': 'nightgown', 'shoes': 'slippers'}, 'bedtime');
       expect(r.stars, 2);
-      expect(r.message, 'Nice! Can you add one more thing?');
+      expect(r.message, 'Nice! Can you add the teddy bear?');
+      expect(judge({'dress': 'nightgown', 'shoes': 'slippers', 'extra': 'teddy'}, 'bedtime').stars, 3);
+    });
+
+    test('no shoes needed for bed or a sleepover', () {
+      expect(judge({'dress': 'pajamas'}, 'bedtime').complete, isTrue);
+      expect(judge({'dress': 'pajamas', 'extra': 'teddy', 'hat': 'sleepmask'}, 'bedtime').stars, 3);
+      expect(judge({'dress': 'pajamas', 'extra': 'sleepingbag', 'hat': 'sleepmask'}, 'sleepover').stars, 3);
+      expect(judge({'dress': 'pajamas'}, 'school').message, contains('shoes'));
     });
 
     test('a piece that does not suit gets 1 star and a swap hint', () {
