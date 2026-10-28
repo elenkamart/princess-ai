@@ -40,35 +40,35 @@ const FEET = (skin) => e(104, 356, 14, 9, skin) + e(136, 356, 14, 9, skin);
  * tags: weather the piece is made for - rain (keeps you dry), warm (cold and snow), cool (hot days). */
 const ITEMS = [
   // Tops
-  { id: 'tee', name: 'Star T-shirt', slot: 'top', fits: ['school', 'park'], tags: [], color: '#ff8fb1',
+  { id: 'tee', name: 'Star T-shirt', slot: 'top', fits: ['school', 'park', 'playground', 'kitchen'], tags: [], color: '#ff8fb1',
     draw: (o) => p(TEE_SL[0], o.color) + p(TEE_SL[1], o.color) + p(TEE, o.color) + star(120, 188, 16, '#ffc23d') },
   { id: 'polo', name: 'School shirt', slot: 'top', fits: ['school'], tags: [], color: '#7fb4ec',
     draw: (o) => p(TEE_SL[0], o.color) + p(TEE_SL[1], o.color) + p(TEE, o.color) + p('M104 136 L114 156 L120 142 Z', '#ffffff') + p('M136 136 L126 156 L120 142 Z', '#ffffff') + dots([[120, 166, 2.5], [120, 180, 2.5]], INK) },
   { id: 'sparkle', name: 'Sparkly top', slot: 'top', fits: ['party', 'birthday'], tags: [], color: '#c9a7ff',
     draw: (o) => p(TEE, o.color) + c(86, 150, 16, o.color) + c(154, 150, 16, o.color) + dots([[104, 170], [130, 162], [118, 190], [140, 208], [100, 214], [126, 226]], '#ffffff') + star(112, 200, 7, '#ffc23d', true) + star(138, 184, 6, '#ffc23d', true) },
-  { id: 'tank', name: 'Tank top', slot: 'top', fits: ['beach', 'park'], tags: ['cool'], color: '#ffd166',
+  { id: 'tank', name: 'Tank top', slot: 'top', fits: ['beach', 'park', 'playground'], tags: ['cool'], color: '#ffd166',
     draw: (o) => p('M98 138 L106 138 L108 150 L132 150 L134 138 L142 138 Q152 150 151 238 Q120 244 89 238 Q88 150 98 138 Z', o.color) + line('M90 196 L150 196', '#ff7a59', 6) + line('M90 214 L150 214', '#ff7a59', 6) },
-  { id: 'sweater', name: 'Cozy sweater', slot: 'top', fits: ['school', 'snowplay'], tags: ['warm'], color: '#3fb08a',
+  { id: 'sweater', name: 'Cozy sweater', slot: 'top', fits: ['school', 'snowplay', 'kitchen'], tags: ['warm'], color: '#3fb08a',
     draw: (o) => p(LONG_SL[0], o.color) + p(LONG_SL[1], o.color) + p(LONG, o.color) + line('M68 230 L87 230', '#ffffff', 4) + line('M153 230 L172 230', '#ffffff', 4) + p('M120 200 C108 188 104 176 113 172 C118 170 120 175 120 177 C120 175 122 170 127 172 C136 176 132 188 120 200 Z', '#ff8fb1') },
   { id: 'xmassweater', name: 'Christmas sweater', slot: 'top', fits: ['christmas', 'school', 'snowplay'], tags: ['warm'], color: '#d13667',
     draw: (o) => p(LONG_SL[0], o.color) + p(LONG_SL[1], o.color) + p(LONG, o.color) + line('M90 166 L98 158 L106 166 L114 158 L122 166 L130 158 L138 166 L146 158 L152 164', '#ffffff', 4) + p('M120 180 L136 214 L104 214 Z', '#3cc48f') + rect(116, 214, 8, 8, 1, '#7a4a2a', true) + star(120, 180, 6, '#ffc23d', true) + line('M68 230 L87 230', '#ffffff', 4) + line('M153 230 L172 230', '#ffffff', 4) },
-  { id: 'sportsshirt', name: 'Sports shirt', slot: 'top', fits: ['sports', 'park'], tags: ['cool'], color: '#3cc48f',
+  { id: 'sportsshirt', name: 'Sports shirt', slot: 'top', fits: ['sports', 'park', 'playground'], tags: ['cool'], color: '#3cc48f',
     draw: (o) => p(TEE_SL[0], o.color) + p(TEE_SL[1], o.color) + p(TEE, o.color) + line('M90 196 L150 196', '#ffffff', 8) + p('M110 136 L120 150 L130 136 Z', '#ffffff') },
 
   // Bottoms
-  { id: 'jeans', name: 'Jeans', plural: true, slot: 'bottom', fits: ['school', 'park'], tags: [], color: '#4a6fb5',
+  { id: 'jeans', name: 'Jeans', plural: true, slot: 'bottom', fits: ['school', 'park', 'playground', 'kitchen'], tags: [], color: '#4a6fb5',
     draw: (o) => p(PANTS, o.color) + line('M120 236 L120 266', '#2f4f8c', 3) + line('M96 334 L114 334', '#9cb6e6', 3) + line('M126 334 L144 334', '#9cb6e6', 3) },
-  { id: 'shorts', name: 'Shorts', plural: true, slot: 'bottom', fits: ['park', 'beach'], tags: ['cool'], color: '#ff7a59',
+  { id: 'shorts', name: 'Shorts', plural: true, slot: 'bottom', fits: ['park', 'beach', 'playground'], tags: ['cool'], color: '#ff7a59',
     draw: (o) => p(SHORTS, o.color) },
   { id: 'tutu', name: 'Tutu skirt', slot: 'bottom', fits: ['party', 'birthday', 'ballet'], tags: [], color: '#ff8fb1',
     draw: (o) => p('M84 232 L156 232 L174 292 L162 286 L152 296 L141 286 L130 296 L120 286 L110 296 L99 286 L88 296 L78 286 L66 292 Z', '#ffd6e3') + p('M88 232 L152 232 L164 274 L152 268 L142 278 L131 268 L120 278 L109 268 L98 278 L88 268 L76 274 Z', o.color) },
-  { id: 'leggings', name: 'Leggings', plural: true, slot: 'bottom', fits: ['school', 'park', 'ballet', 'sports'], tags: [], color: '#8a63d2',
+  { id: 'leggings', name: 'Leggings', plural: true, slot: 'bottom', fits: ['school', 'park', 'ballet', 'sports', 'playground', 'kitchen'], tags: [], color: '#8a63d2',
     draw: (o) => p('M92 232 L148 232 L146 344 L126 344 L120 270 L114 344 L94 344 Z', o.color) + dots([[104, 260], [136, 260], [104, 300], [136, 300], [104, 330], [136, 330]], '#ece3ff') },
-  { id: 'skirt', name: 'Flower skirt', slot: 'bottom', fits: ['park', 'party', 'birthday', 'school'], tags: ['cool'], color: '#8a63d2',
+  { id: 'skirt', name: 'Flower skirt', slot: 'bottom', fits: ['park', 'party', 'birthday', 'school', 'kitchen'], tags: ['cool'], color: '#8a63d2',
     draw: (o) => p('M88 232 L152 232 L166 288 Q120 298 74 288 Z', o.color) + [[100, 256], [128, 248], [114, 276], [146, 276], [88, 280]].map((d) => c(d[0], d[1], 5, '#ffd166', true) + c(d[0], d[1], 2, '#ffffff', true)).join('') },
   { id: 'snowpants', name: 'Snow pants', plural: true, slot: 'bottom', fits: ['snowplay'], tags: ['warm'], color: '#3d6b7a',
     draw: (o) => p('M88 230 L152 230 L151 344 L125 344 L120 268 L115 344 L89 344 Z', o.color) + e(104, 300, 8, 11, '#5f93a8', true) + e(136, 300, 8, 11, '#5f93a8', true) },
-  { id: 'sportsshorts', name: 'Sports shorts', plural: true, slot: 'bottom', fits: ['sports', 'park'], tags: ['cool'], color: '#2a73c0',
+  { id: 'sportsshorts', name: 'Sports shorts', plural: true, slot: 'bottom', fits: ['sports', 'park', 'playground'], tags: ['cool'], color: '#2a73c0',
     draw: (o) => p(SHORTS, o.color) + line('M93 238 L91 280', '#ffffff', 4) + line('M147 238 L149 280', '#ffffff', 4) },
 
   // Dresses and costumes (replace top and bottoms)
@@ -78,9 +78,9 @@ const ITEMS = [
     draw: (o) => p('M80 248 Q120 258 160 248 L172 298 Q120 312 68 298 Z', '#ffe08a') + p('M92 204 L148 204 L162 252 Q120 262 78 252 Z', o.color) + p('M90 142 Q94 136 106 136 L134 136 Q146 136 150 142 L148 206 L92 206 Z', o.color) + c(86, 150, 15, '#ffe08a') + c(154, 150, 15, '#ffe08a') + dots([[104, 170, 3.5], [134, 180, 3.5], [116, 228, 3.5], [96, 278, 3.5], [140, 284, 3.5]], '#d13667') + dots([[124, 160, 3.5], [102, 196, 3.5], [140, 230, 3.5], [118, 290, 3.5]], '#2a73c0') + dots([[140, 160, 3.5], [110, 248, 3.5], [156, 276, 3.5], [82, 284, 3.5]], '#3cc48f') },
   { id: 'sundress', name: 'Sundress', slot: 'dress', fits: ['beach', 'park'], tags: ['cool'], color: '#ffd166',
     draw: (o) => p('M100 138 L106 138 L108 152 L132 152 L134 138 L140 138 Q148 160 146 204 L166 294 Q120 306 74 294 L94 204 Q92 160 100 138 Z', o.color) + [[104, 236], [132, 228], [116, 266], [146, 270], [92, 276], [124, 288]].map((d) => c(d[0], d[1], 6, '#ff8fb1', true) + c(d[0], d[1], 2.5, '#ffffff', true)).join('') },
-  { id: 'pajamas', name: 'Pajamas', plural: true, slot: 'dress', fits: ['bedtime'], tags: [], color: '#9fd3ff',
+  { id: 'pajamas', name: 'Pajamas', plural: true, slot: 'dress', fits: ['bedtime', 'sleepover'], tags: [], color: '#9fd3ff',
     draw: (o) => p('M92 232 L148 232 L148 344 L125 344 L120 270 L115 344 L92 344 Z', o.color) + p(LONG_SL[0], o.color) + p(LONG_SL[1], o.color) + p(LONG, o.color) + p('M104 136 L114 152 L120 142 L126 152 L136 136 Z', '#ffffff') + dots([[104, 176], [134, 172], [118, 204], [100, 226], [140, 222], [104, 290], [136, 300], [102, 324], [138, 330], [76, 190], [164, 200]], '#ffffff') },
-  { id: 'nightgown', name: 'Nightgown', slot: 'dress', fits: ['bedtime'], tags: [], color: '#ece3ff',
+  { id: 'nightgown', name: 'Nightgown', slot: 'dress', fits: ['bedtime', 'sleepover'], tags: [], color: '#ece3ff',
     draw: (o) => p(LONG_SL[0], o.color) + p(LONG_SL[1], o.color) + p('M88 142 Q92 136 104 136 L136 136 Q148 136 152 142 L162 334 Q120 344 78 334 Z', o.color) + star(104, 200, 7, '#ffc23d', true) + star(136, 240, 6, '#ffc23d', true) + star(112, 290, 7, '#ffc23d', true) + star(142, 306, 5, '#ffc23d', true) + p('M134 168 A10 10 0 1 1 124 156 A8 8 0 0 0 134 168 Z', '#ffc23d') },
   { id: 'swimsuit', name: 'Swimsuit', slot: 'dress', fits: ['beach', 'swimming'], tags: ['cool'], color: '#2a9fd6',
     draw: (o) => p(SWIM, o.color) + line('M93 190 L147 190', '#ffffff', 6) + line('M92 214 L148 214', '#ffffff', 6) },
@@ -91,18 +91,24 @@ const ITEMS = [
   { id: 'catcostume', name: 'Cat costume', slot: 'dress', fits: ['halloween'], tags: [], color: '#3a3170',
     draw: (o) => line('M150 240 Q190 240 184 196', o.color, 8) + p('M92 232 L148 232 L148 344 L125 344 L120 270 L115 344 L92 344 Z', o.color) + p(LONG_SL[0], o.color) + p(LONG_SL[1], o.color) + p(LONG, o.color) + e(120, 200, 18, 30, '#ece3ff', true) },
 
+  { id: 'overalls', name: 'Play overalls', plural: true, slot: 'dress', fits: ['playground', 'park', 'kitchen'], tags: [], color: '#4a6fb5',
+    draw: (o) => p(TEE_SL[0], '#ffd166') + p(TEE_SL[1], '#ffd166') + p(TEE, '#ffd166') + line('M70 168 L87 168', '#ff7a59', 4) + line('M153 168 L170 168', '#ff7a59', 4) + p(PANTS, o.color) + p('M98 172 L142 172 L144 240 L96 240 Z', o.color) + line('M100 174 L104 140', o.color, 6) + line('M140 174 L136 140', o.color, 6) + dots([[101, 180, 3.5], [139, 180, 3.5]], '#ffc23d') + rect(108, 192, 24, 18, 3, '#5b86c9') },
+
   // Coats
   { id: 'raincoat', name: 'Raincoat', slot: 'coat', fits: [], tags: ['rain'], color: '#ffc23d',
     draw: (o) => p('M84 144 L64 152 L66 240 L88 240 Z', o.color) + p('M156 144 L176 152 L174 240 L152 240 Z', o.color) + p('M84 142 Q88 134 102 134 L138 134 Q152 134 156 142 L164 278 Q120 286 76 278 Z', o.color) + line('M120 142 L120 280', INK, 3) + dots([[128, 170, 3.5], [128, 200, 3.5], [128, 230, 3.5]], INK) + p('M100 134 L114 150 L120 136 L126 150 L140 134 Z', o.color) },
-  { id: 'jacket', name: 'Denim jacket', slot: 'coat', fits: ['school', 'park'], tags: ['warm'], color: '#5b86c9',
+  { id: 'jacket', name: 'Denim jacket', slot: 'coat', fits: ['school', 'park', 'playground'], tags: ['warm'], color: '#5b86c9',
     draw: (o) => p('M84 144 L64 152 L66 238 L88 238 Z', o.color) + p('M156 144 L176 152 L174 238 L152 238 Z', o.color) + p('M84 142 Q88 134 102 134 L112 134 L114 240 L86 240 Z', o.color) + p('M156 142 Q152 134 138 134 L128 134 L126 240 L154 240 Z', o.color) + p('M92 170 L108 170 L108 184 L92 184 Z', '#7fa4dd') + p('M132 170 L148 170 L148 184 L132 184 Z', '#7fa4dd') },
   { id: 'puffer', name: 'Puffer coat', slot: 'coat', fits: ['snowplay'], tags: ['warm'], color: '#2a9fd6',
     draw: (o) => p('M82 146 L62 154 L64 242 L88 242 Z', o.color) + p('M158 146 L178 154 L176 242 L152 242 Z', o.color) + p('M82 142 Q86 132 102 132 L138 132 Q154 132 158 142 L162 272 Q120 280 78 272 Z', o.color) + line('M81 172 L159 172', '#1d78ad', 3) + line('M80 202 L160 202', '#1d78ad', 3) + line('M79 232 L161 232', '#1d78ad', 3) + line('M63 196 L87 196', '#1d78ad', 3) + line('M153 196 L177 196', '#1d78ad', 3) + line('M120 136 L120 276', INK, 3) + p('M98 132 L98 122 L142 122 L142 132 L120 144 Z', o.color) },
 
+  { id: 'apron', name: 'Apron', slot: 'coat', fits: ['kitchen'], tags: [], color: '#ff8fb1',
+    draw: (o) => line('M104 152 Q120 126 136 152', o.color, 5) + p('M104 150 L136 150 L138 190 L152 196 L156 290 Q120 300 84 290 L88 196 L102 190 Z', o.color) + line('M88 198 L66 206 M152 198 L174 206', o.color, 5) + dots([[110, 166], [130, 176], [100, 222], [126, 216], [146, 240], [110, 262], [138, 274], [94, 280]], '#ffffff') + rect(106, 232, 28, 22, 4, '#ffd6e3') },
+
   // Shoes
-  { id: 'sneakers', name: 'Sneakers', plural: true, slot: 'shoes', fits: ['school', 'park'], tags: [], color: '#ffffff',
+  { id: 'sneakers', name: 'Sneakers', plural: true, slot: 'shoes', fits: ['school', 'park', 'playground'], tags: [], color: '#ffffff',
     draw: (o) => p(SNEAKER_L, o.color) + p(SNEAKER_R, o.color) + line('M88 362 L117 362', '#d13667', 4) + line('M123 362 L152 362', '#d13667', 4) + line('M100 350 L112 350', '#2a73c0', 3) + line('M128 350 L140 350', '#2a73c0', 3) },
-  { id: 'runners', name: 'Running shoes', plural: true, slot: 'shoes', fits: ['sports', 'park', 'school'], tags: [], color: '#ffc23d',
+  { id: 'runners', name: 'Running shoes', plural: true, slot: 'shoes', fits: ['sports', 'park', 'school', 'playground'], tags: [], color: '#ffc23d',
     draw: (o) => p(SNEAKER_L, o.color) + p(SNEAKER_R, o.color) + line('M88 362 L117 362', '#ffffff', 4) + line('M123 362 L152 362', '#ffffff', 4) + line('M92 356 Q104 358 114 348', '#d13667', 3) + line('M126 348 Q136 358 148 356', '#d13667', 3) },
   { id: 'boots', name: 'Rain boots', plural: true, slot: 'shoes', fits: [], tags: ['rain'], color: '#d13667',
     draw: (o) => p('M97 316 L119 316 L119 362 Q119 368 112 368 L90 368 Q84 368 86 358 L97 350 Z', o.color) + p('M121 316 L143 316 L143 350 L154 358 Q156 368 148 368 L128 368 Q121 368 121 362 Z', o.color) + line('M98 324 L118 324', '#ffd6e3', 4) + line('M122 324 L142 324', '#ffd6e3', 4) },
@@ -116,13 +122,13 @@ const ITEMS = [
     draw: (o) => p('M94 348 L118 348 L119 362 Q119 368 112 368 L90 368 Q84 368 86 362 Z', o.color) + p('M122 348 L146 348 L154 362 Q156 368 148 368 L128 368 Q121 368 121 362 Z', o.color) + line('M96 352 L118 346', INK, 3) + line('M122 346 L144 352', INK, 3) + c(110, 356, 3, '#ffffff', true) + c(134, 356, 3, '#ffffff', true) },
   { id: 'balletshoes', name: 'Ballet shoes', plural: true, slot: 'shoes', fits: ['ballet'], tags: [], color: '#ffb3c8',
     draw: (o) => line('M100 346 L116 322 M116 346 L100 322', '#ff8fb1', 3) + line('M124 346 L140 322 M140 346 L124 322', '#ff8fb1', 3) + p('M96 346 L118 346 L119 362 Q119 368 112 368 L92 368 Q86 368 88 360 Z', o.color) + p('M122 346 L144 346 L152 360 Q154 368 148 368 L128 368 Q121 368 121 362 Z', o.color) },
-  { id: 'slippers', name: 'Bunny slippers', plural: true, slot: 'shoes', fits: ['bedtime'], tags: [], color: '#ffffff',
+  { id: 'slippers', name: 'Bunny slippers', plural: true, slot: 'shoes', fits: ['bedtime', 'sleepover', 'kitchen'], tags: [], color: '#ffffff',
     draw: (o) => e(96, 334, 5, 13, o.color) + e(110, 334, 5, 13, o.color) + e(130, 334, 5, 13, o.color) + e(144, 334, 5, 13, o.color) + e(103, 356, 19, 12, o.color) + e(137, 356, 19, 12, o.color) + dots([[97, 352, 2], [109, 352, 2], [131, 352, 2], [143, 352, 2]], INK) + dots([[103, 359, 3], [137, 359, 3]], '#ff8fb1') },
 
   // Hats
   { id: 'sunhat', name: 'Sun hat', slot: 'hat', fits: ['beach', 'park'], tags: ['cool'], color: '#f2c66d',
     draw: (o) => e(120, 50, 74, 15, o.color) + p('M86 50 Q88 16 120 16 Q152 16 154 50 Z', o.color) + line('M88 42 L152 42', '#ff7a59', 7) },
-  { id: 'cap', name: 'Cap', slot: 'hat', fits: ['park', 'sports'], tags: ['cool'], color: '#2a73c0',
+  { id: 'cap', name: 'Cap', slot: 'hat', fits: ['park', 'sports', 'playground'], tags: ['cool'], color: '#2a73c0',
     draw: (o) => p('M150 56 Q188 54 194 64 Q172 68 150 64 Z', o.color) + p('M76 60 Q78 20 120 20 Q162 20 164 60 Z', o.color) + c(120, 20, 4, '#ffc23d') },
   { id: 'rainhat', name: 'Rain hat', slot: 'hat', fits: [], tags: ['rain'], color: '#ffc23d',
     draw: (o) => p('M66 70 Q76 62 82 50 Q90 18 120 18 Q150 18 158 50 Q164 62 174 70 Q120 82 66 70 Z', o.color) },
@@ -141,13 +147,18 @@ const ITEMS = [
   { id: 'swimcap', name: 'Swim cap', slot: 'hat', fits: ['swimming'], tags: [], color: '#ff7a59',
     draw: (o) => p('M72 82 Q70 30 120 30 Q170 30 168 82 Q120 70 72 82 Z', o.color) + dots([[100, 50, 4], [126, 44, 4], [146, 60, 4], [110, 66, 4]], '#ffd6e3') },
 
+  { id: 'chefhat', name: 'Chef hat', slot: 'hat', fits: ['kitchen'], tags: [], color: '#ffffff',
+    draw: (o) => c(96, 22, 18, o.color) + c(144, 22, 18, o.color) + c(120, 12, 22, o.color) + rect(86, 26, 68, 28, 6, o.color) },
+  { id: 'sleepmask', name: 'Sleep mask', slot: 'hat', fits: ['sleepover', 'bedtime'], tags: [], color: '#c9a7ff',
+    draw: (o) => line('M74 62 Q120 50 166 62', o.color, 5) + p('M90 54 Q104 44 118 54 Q120 56 122 54 Q136 44 150 54 Q152 70 136 72 Q124 72 120 66 Q116 72 104 72 Q88 70 90 54 Z', o.color) + star(104, 60, 5, '#ffc23d', true) + star(136, 60, 5, '#ffc23d', true) },
+
   // Extras
   { id: 'backpack', name: 'Backpack', slot: 'extra', fits: ['school'], tags: [], color: '#3fb08a',
     back: (o) => rect(146, 148, 38, 88, 12, o.color),
     draw: (o) => line('M100 138 L102 214', o.color, 8) + line('M140 138 L138 214', o.color, 8) },
   { id: 'sunglasses', name: 'Sunglasses', plural: true, slot: 'extra', fits: ['beach'], tags: ['cool'], color: '#2b2147',
     draw: (o) => rect(88, 82, 26, 18, 7, o.color) + rect(126, 82, 26, 18, 7, o.color) + line('M114 88 L126 88', INK, 3) + line('M92 86 L98 86', '#ffffff', 3) + line('M130 86 L136 86', '#ffffff', 3) },
-  { id: 'waterbottle', name: 'Water bottle', slot: 'extra', fits: ['sports', 'park', 'beach'], tags: ['cool'], color: '#2a9fd6',
+  { id: 'waterbottle', name: 'Water bottle', slot: 'extra', fits: ['sports', 'park', 'beach', 'playground'], tags: ['cool'], color: '#2a9fd6',
     draw: (o) => rect(66, 210, 14, 10, 3, '#ffffff') + rect(62, 218, 22, 46, 7, o.color) + line('M64 238 L82 238', '#9fd3ff', 4) },
   { id: 'umbrella', name: 'Umbrella', slot: 'extra', fits: [], tags: ['rain'], color: '#2a73c0',
     draw: (o) => line('M168 34 L168 244 Q168 256 158 256', '#7a4a2a', 5) + p('M96 40 Q168 -24 240 40 Q222 30 204 40 Q186 30 168 40 Q150 30 132 40 Q114 30 96 40 Z', o.color) + line('M168 -6 L168 4', INK, 4) },
@@ -159,8 +170,12 @@ const ITEMS = [
     draw: (o) => rect(50, 228, 42, 36, 4, o.color) + line('M71 228 L71 264', '#ffc23d', 6) + line('M50 245 L92 245', '#ffc23d', 6) + p('M71 228 Q58 214 64 211 Q71 209 71 228 Z', '#ffc23d') + p('M71 228 Q84 214 78 211 Q71 209 71 228 Z', '#ffc23d') },
   { id: 'pumpkin', name: 'Pumpkin bucket', slot: 'extra', fits: ['halloween'], tags: [], color: '#ff7a59',
     draw: (o) => line('M56 240 Q71 212 86 240', INK, 3) + e(71, 250, 19, 16, o.color) + e(71, 250, 7, 16, 'none') + fillOnly('M62 246 L66 240 L70 246 Z', INK) + fillOnly('M72 246 L76 240 L80 246 Z', INK) + fillOnly('M62 254 Q71 262 80 254 L76 258 L71 256 L66 258 Z', INK) },
-  { id: 'teddy', name: 'Teddy bear', slot: 'extra', fits: ['bedtime'], tags: [], color: '#b07a4f',
-    draw: (o) => c(70, 254, 16, o.color) + c(60, 214, 5, o.color) + c(80, 214, 5, o.color) + c(70, 226, 13, o.color) + e(70, 231, 6, 4.5, '#e3c0a0', true) + dots([[65, 223, 1.8], [75, 223, 1.8], [70, 230, 1.8]], INK) + e(70, 258, 8, 9, '#e3c0a0', true) }
+  { id: 'teddy', name: 'Teddy bear', slot: 'extra', fits: ['bedtime', 'sleepover'], tags: [], color: '#b07a4f',
+    draw: (o) => c(70, 254, 16, o.color) + c(60, 214, 5, o.color) + c(80, 214, 5, o.color) + c(70, 226, 13, o.color) + e(70, 231, 6, 4.5, '#e3c0a0', true) + dots([[65, 223, 1.8], [75, 223, 1.8], [70, 230, 1.8]], INK) + e(70, 258, 8, 9, '#e3c0a0', true) },
+  { id: 'ovenmitt', name: 'Oven mitt', slot: 'extra', fits: ['kitchen'], tags: [], color: '#d13667',
+    draw: (o) => e(62, 238, 6, 10, o.color) + p('M66 262 L66 228 Q66 210 79 210 Q92 210 92 228 L92 262 Z', o.color) + line('M66 252 L92 252', '#ffffff', 4) },
+  { id: 'sleepingbag', name: 'Sleeping bag', slot: 'extra', fits: ['sleepover'], tags: [], color: '#3fb08a',
+    draw: (o) => rect(36, 234, 50, 30, 15, o.color) + c(42, 249, 13, '#9fd3ff') + c(42, 249, 5, o.color) + line('M58 236 L58 262', '#2b8a6a', 3) }
 ];
 
 const THUMBS = {
@@ -170,7 +185,8 @@ const THUMBS = {
   partyhat: '56 -18 144 108', witchhat: '36 -20 168 92', santahat: '60 0 140 90', swimcap: '56 20 128 70',
   backpack: '90 126 100 120', sunglasses: '82 72 76 36', goggles: '66 74 108 32', umbrella: '90 -22 152 284',
   teddy: '48 200 44 74', waterbottle: '50 204 46 66', present: '40 204 64 66', pumpkin: '44 206 56 66',
-  scarfmittens: '58 120 124 150'
+  scarfmittens: '58 120 124 150', overalls: '52 128 136 222', apron: '54 120 132 184', chefhat: '70 -14 100 72',
+  sleepmask: '68 40 104 40', ovenmitt: '50 204 48 64', sleepingbag: '24 228 70 42'
 };
 
 const SLOTS = [
@@ -182,6 +198,9 @@ const SLOTS = [
 const OCCASIONS = {
   school: { name: 'School', outdoor: true, hello: 'Time for school! What should I wear?', yay: 'Ready to learn! Thank you!' },
   park: { name: 'Park', outdoor: true, hello: 'Let’s go play in the park!', yay: 'Let’s play outside!' },
+  playground: { name: 'Playground', outdoor: true, hello: 'To the playground! I want to climb and slide.', yay: 'Wheee! Down the slide!' },
+  kitchen: { name: 'Kitchen', outdoor: false, hello: 'Let’s bake cookies! What should I wear?', yay: 'Yum! I’m ready to cook!' },
+  sleepover: { name: 'Sleepover', outdoor: false, hello: 'Sleepover at my friend’s house! What should I bring?', yay: 'Pillow fight! Best night ever!' },
   beach: { name: 'Beach', outdoor: true, hello: 'We’re going to the beach!', yay: 'Sun, sand and sea!' },
   sports: { name: 'Sports', outdoor: true, hello: 'Time for sports! I want to run fast.', yay: 'Ready, set, go!' },
   snowplay: { name: 'Snow day', outdoor: true, hello: 'Snow! Let’s go build a snowman.', yay: 'Snowball time! I’m nice and warm.' },
@@ -248,6 +267,24 @@ const BACKDROPS = {
   park: S(['<rect width="400" height="440" fill="#dff3ff"/>', '<circle cx="330" cy="70" r="34" fill="#ffc23d"/>', '<ellipse cx="80" cy="420" rx="220" ry="90" fill="#a8e0b9"/>',
     '<ellipse cx="340" cy="430" rx="200" ry="80" fill="#7fcf9a"/>', '<rect x="40" y="250" width="16" height="80" rx="6" fill="#9b6a3a"/>', '<circle cx="48" cy="236" r="44" fill="#3cc48f"/>',
     '<circle cx="352" cy="300" r="10" fill="#ff8fb1"/>', '<circle cx="372" cy="318" r="8" fill="#ffc23d"/>']),
+  playground: S(['<rect width="400" height="440" fill="#dff3ff"/>', '<rect y="372" width="400" height="68" fill="#ffe3a3"/>',
+    '<path d="M300 380 V180 M340 380 V180" stroke="#d13667" stroke-width="8" stroke-linecap="round"/>', '<path d="M300 200 H340 M300 240 H340 M300 280 H340 M300 320 H340" stroke="#d13667" stroke-width="5"/>',
+    '<path d="M340 180 H360 L398 380" fill="none" stroke="#2b2147" stroke-width="3"/>', '<path d="M344 186 L360 186 L396 372 L382 372 Z" fill="#ffc23d" stroke="#2b2147" stroke-width="3" stroke-linejoin="round"/>',
+    '<path d="M10 120 H120 M20 120 L4 380 M110 120 L126 380" stroke="#2a73c0" stroke-width="8" stroke-linecap="round"/>', '<path d="M50 122 V300 M80 122 V300" stroke="#2b2147" stroke-width="3"/>',
+    '<rect x="42" y="298" width="46" height="10" rx="4" fill="#3cc48f" stroke="#2b2147" stroke-width="3"/>']),
+  kitchen: S(['<rect width="400" height="440" fill="#fff1c7"/>', '<path d="M0 60 H400 M0 120 H400 M0 180 H400 M0 240 H400 M100 0 V280 M200 0 V280 M300 0 V280" stroke="#f3e2b0" stroke-width="3"/>',
+    '<rect x="16" y="40" width="110" height="80" rx="8" fill="#9fd3ff" stroke="#2b2147" stroke-width="4"/>', '<path d="M16 80 H126 M71 40 V120" stroke="#ffffff" stroke-width="4"/>',
+    '<rect y="280" width="400" height="104" fill="#ffffff" stroke="#2b2147" stroke-width="3"/>', '<rect y="268" width="400" height="16" fill="#e2c3ab" stroke="#2b2147" stroke-width="3"/>',
+    '<rect x="290" y="296" width="92" height="76" rx="6" fill="#5f5677" stroke="#2b2147" stroke-width="3"/>', '<rect x="302" y="314" width="68" height="44" rx="4" fill="#ffc23d" opacity=".6"/>',
+    '<rect x="20" y="300" width="80" height="70" rx="6" fill="#ffd6e3" stroke="#2b2147" stroke-width="3"/>', '<rect y="384" width="400" height="56" fill="#f3d9b1"/>',
+    '<ellipse cx="340" cy="250" rx="30" ry="10" fill="#e2c3ab" stroke="#2b2147" stroke-width="3"/>', '<circle cx="330" cy="246" r="7" fill="#b07a4f"/>', '<circle cx="350" cy="244" r="7" fill="#b07a4f"/>',
+    '<path d="M300 30 V90 M290 90 h20 l-4 30 h-12 z" fill="#ff8fb1" stroke="#2b2147" stroke-width="3"/>']),
+  sleepover: S(['<rect width="400" height="440" fill="#4b3f8a"/>', '<path d="M0 30 Q100 70 200 30 Q300 70 400 30" fill="none" stroke="#ece3ff" stroke-width="2"/>',
+    [[30, 44], [80, 54], [130, 46], [180, 34], [230, 46], [280, 54], [330, 46], [380, 36]].map((d, i) => '<circle cx="' + d[0] + '" cy="' + d[1] + '" r="6" fill="' + ['#ffc23d', '#ff8fb1', '#9fd3ff', '#3cc48f'][i % 4] + '"/>').join(''),
+    '<path d="M260 384 L330 230 L400 384 Z" fill="#ff8fb1" stroke="#2b2147" stroke-width="3" stroke-linejoin="round"/>', '<path d="M330 230 L312 384 M330 230 L348 384" stroke="#2b2147" stroke-width="3"/>',
+    '<path d="M312 384 L330 300 L348 384 Z" fill="#3a3170"/>', '<rect y="384" width="400" height="56" fill="#6b5aa8"/>',
+    '<rect x="10" y="356" width="120" height="34" rx="16" fill="#3fb08a" stroke="#2b2147" stroke-width="3"/>', '<ellipse cx="34" cy="364" rx="20" ry="12" fill="#ffffff" stroke="#2b2147" stroke-width="3"/>',
+    '<path d="M40 120 A26 26 0 1 1 20 96 A20 20 0 0 0 40 120 Z" fill="#ffc23d"/>']),
   beach: S(['<rect width="400" height="440" fill="#cdeeff"/>', '<circle cx="70" cy="70" r="36" fill="#ffc23d"/>', '<rect y="270" width="400" height="70" fill="#5cc0e8"/>',
     '<path d="M0 286 q25 -12 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0" fill="none" stroke="#ffffff" stroke-width="4"/>', '<rect y="336" width="400" height="104" fill="#ffe3a3"/>',
     '<circle cx="350" cy="380" r="8" fill="#ff7a59"/>']),
@@ -314,6 +351,9 @@ const ICON_PATHS = {
   school: 'M3 6c3-1.3 6-1.3 9 1 3-2.3 6-2.3 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z M12 7v13',
   park: 'M12 21v-6 M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M9 21h6',
   beach: SUN,
+  playground: 'M4 21V6h4v15 M4 10h4 M4 14h4 M8 6l11 13h2',
+  kitchen: 'M7 14a4 4 0 1 1 1.5-7.7A4 4 0 0 1 16 5.5a4 4 0 1 1 1 8.5V20H7z M7 17h10',
+  sleepover: 'M3 20L12 4l9 16z M12 4v16 M9 20l3-6 3 6',
   sports: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7l4 3-1.5 5h-5L8 10z M12 7V3 M16 10l4.5-1.5 M14.5 15l2.5 4 M9.5 15L7 19 M8 10L3.5 8.5',
   snowplay: 'M12 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M7 12L3 9 M17 12l4-3',
   swimming: 'M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0 M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0 M15 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',

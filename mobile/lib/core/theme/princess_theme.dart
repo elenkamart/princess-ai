@@ -54,6 +54,9 @@ class PrincessColors {
 enum PrincessOccasion {
   school('School', PrincessColors.skyTint, PrincessColors.skyDeep),
   park('Park', PrincessColors.mintTint, PrincessColors.mintDeep),
+  playground('Playground', PrincessColors.coralTint, PrincessColors.coralDeep),
+  kitchen('Kitchen', PrincessColors.sandTint, PrincessColors.sandDeep),
+  sleepover('Sleepover', PrincessColors.lilacTint, PrincessColors.lilacDeep),
   beach('Beach', PrincessColors.sandTint, PrincessColors.sandDeep),
   sports('Sports', PrincessColors.mintTint, PrincessColors.mintDeep),
   snowplay('Snow day', PrincessColors.rainTint, PrincessColors.rainDeep),

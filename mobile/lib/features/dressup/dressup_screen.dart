@@ -18,7 +18,6 @@ class DressUpScreen extends StatefulWidget {
 }
 
 class _DressUpScreenState extends State<DressUpScreen> {
-  static const _when = ['Morning', 'Afternoon', 'Evening'];
 
   final DateTime _today = DateTime.now();
   DressUpProgress? _progress;
@@ -193,6 +192,8 @@ class _DressUpScreenState extends State<DressUpScreen> {
             builder: (context, box) {
               final wide = box.maxWidth >= 880;
               final narrow = box.maxWidth < 560;
+              // The plan can change length (weather, special days), so keep the selection inside it.
+              if (_cur >= p.day(_today).plan.length) _cur = 0;
               return SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(PrincessSpace.s16, PrincessSpace.s16, PrincessSpace.s16, PrincessSpace.s32),
                 child: Center(
@@ -274,20 +275,23 @@ class _DressUpScreenState extends State<DressUpScreen> {
 
   Widget _plan(DressUpProgress p, bool narrow) {
     final r = p.day(_today);
-    final cards = [
-      for (var i = 0; i < 3; i++)
-        OccasionCard(when: _when[i], occasion: r.plan[i], stars: r.stars[i], selected: i == _cur, onTap: () => _selectOccasion(i)),
-    ];
-    if (narrow) {
-      return Column(children: [for (final c in cards) Padding(padding: const EdgeInsets.only(bottom: PrincessSpace.s8), child: c)]);
-    }
-    return Row(
-      children: [
-        for (var i = 0; i < 3; i++) ...[
-          if (i > 0) const SizedBox(width: PrincessSpace.s12),
-          Expanded(child: cards[i]),
-        ],
-      ],
+    final when = timesOfDay(r.plan.length);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final cols = box.maxWidth >= 1100 ? r.plan.length : box.maxWidth >= 700 ? 3 : 2;
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            crossAxisSpacing: narrow ? PrincessSpace.s8 : PrincessSpace.s12,
+            mainAxisSpacing: narrow ? PrincessSpace.s8 : PrincessSpace.s12,
+            mainAxisExtent: 84,
+          ),
+          itemCount: r.plan.length,
+          itemBuilder: (_, i) => OccasionCard(when: when[i], occasion: r.plan[i], stars: r.stars[i], selected: i == _cur, onTap: () => _selectOccasion(i)),
+        );
+      },
     );
   }
 
@@ -304,7 +308,7 @@ class _DressUpScreenState extends State<DressUpScreen> {
     final maxStage = MediaQuery.sizeOf(context).height * 0.58;
     final buttons = <Widget>[
       PressButton(label: 'Check my outfit', icon: 'check', kind: PressKind.berry, onPressed: _check),
-      if (r.stars[_cur] > 0 && _cur < 2) PressButton(label: 'Next: ${kOccasions[r.plan[_cur + 1]]!.name}', kind: PressKind.star, onPressed: _next),
+      if (r.stars[_cur] > 0 && _cur < r.plan.length - 1) PressButton(label: 'Next: ${kOccasions[r.plan[_cur + 1]]!.name}', kind: PressKind.star, onPressed: _next),
       PressButton(label: 'Start over', icon: 'undo', onPressed: _startOver),
     ];
     return Container(

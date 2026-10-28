@@ -51,7 +51,14 @@ class MonthDay {
 typedef Outfit = Map<String, String>;
 
 /// Occasions a grown-up can put on a calendar day.
-const kSpecialOccasions = ['party', 'birthday', 'sports', 'swimming', 'ballet', 'halloween', 'christmas'];
+const kSpecialOccasions = ['party', 'birthday', 'sleepover', 'sports', 'swimming', 'ballet', 'halloween', 'christmas'];
+
+/// Labels for each outfit of a day, by how many outfits the day has.
+List<String> timesOfDay(int count) => switch (count) {
+      3 => const ['Morning', 'Afternoon', 'Evening'],
+      6 => const ['Morning', 'Midday', 'Afternoon', 'Late afternoon', 'Dinner time', 'Night'],
+      _ => const ['Morning', 'Midday', 'Afternoon', 'Dinner time', 'Night'],
+    };
 
 class Judgement {
   const Judgement({required this.complete, required this.stars, required this.wrong, required this.mood, required this.message});
@@ -105,6 +112,16 @@ _Fit _fit(DressUpItem it, String occasionId, WeatherKind weather) {
 /// Whether [item] suits [occasionId] in [weather].
 bool suits(DressUpItem item, String occasionId, WeatherKind weather) => _fit(item, occasionId, weather) == _Fit.ok;
 
+/// A piece some occasions can't do without, or null when it is there.
+String? _occasionNeed(Iterable<DressUpItem> worn, String occasionId) {
+  bool wearing(String id) => worn.any((it) => it.id == id);
+  return switch (occasionId) {
+    'kitchen' when !wearing('apron') => 'I need an apron so I don’t get messy!',
+    'sleepover' when !wearing('sleepingbag') => 'Don’t forget my sleeping bag!',
+    _ => null,
+  };
+}
+
 /// What the weather still asks for, or null when the outfit is ready for it.
 String? _weatherNeed(Iterable<DressUpItem> worn, String occasionId, WeatherKind weather) {
   if (!kOccasions[occasionId]!.outdoor) return null;
@@ -145,7 +162,7 @@ Judgement judge(Outfit outfit, String occasionId, [WeatherKind weather = Weather
     };
     return Judgement(complete: true, stars: 1, wrong: wrong, mood: Mood.oops, message: message);
   }
-  final need = _weatherNeed(worn, occasionId, weather);
+  final need = _occasionNeed(worn, occasionId) ?? _weatherNeed(worn, occasionId, weather);
   if (need != null) {
     return Judgement(complete: true, stars: 1, wrong: const [], mood: Mood.oops, message: need);
   }
@@ -164,22 +181,30 @@ String? specialFor(DateTime date, {MonthDay? birthday, Map<String, String> speci
   return null;
 }
 
-/// Morning, afternoon and evening occasions for [date]. A special day takes the afternoon.
+/// The day's occasions, morning to night: 5, or 6 on lesson days. Every day ends with the
+/// kitchen at dinner time and bed (a sleepover on Fridays). A special day takes the slot
+/// before dinner; a special sleepover takes the night.
 List<String> dayPlan(DateTime date, {WeatherKind weather = WeatherKind.nice, MonthDay? birthday, Map<String, String> specials = const {}}) {
   final outside = weather == WeatherKind.snow ? 'snowplay' : 'park';
   final sunny = weather == WeatherKind.hot ? 'beach' : outside;
   final plan = switch (date.weekday) {
-    DateTime.monday => ['school', outside],
-    DateTime.tuesday => ['school', 'sports'],
-    DateTime.wednesday => ['school', 'ballet'],
-    DateTime.thursday => ['school', 'swimming'],
-    DateTime.friday => ['school', outside],
-    DateTime.saturday => [sunny, 'party'],
-    _ => ['swimming', sunny],
+    DateTime.monday => ['school', 'playground', outside],
+    DateTime.tuesday => ['school', 'sports', 'playground', outside],
+    DateTime.wednesday => ['school', 'ballet', 'playground', outside],
+    DateTime.thursday => ['school', 'swimming', 'playground', outside],
+    DateTime.friday => ['school', 'playground', outside],
+    DateTime.saturday => [sunny, 'playground', 'party'],
+    _ => ['swimming', sunny, 'playground'],
   };
   final special = specialFor(date, birthday: birthday, specials: specials);
-  if (special != null) plan[1] = special;
-  return [...plan, 'bedtime'];
+  // Friday's sleepover gives way to a holiday or birthday, which ends at home.
+  var night = date.weekday == DateTime.friday && special == null ? 'sleepover' : 'bedtime';
+  if (special == 'sleepover') {
+    night = 'sleepover';
+  } else if (special != null) {
+    plan[plan.length - 1] = special;
+  }
+  return [...plan, 'kitchen', night];
 }
 
 String dateKey(DateTime d) =>

@@ -132,20 +132,21 @@ class OccasionCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 52,
-                      height: 52,
+                      width: 46,
+                      height: 46,
                       decoration: BoxDecoration(color: PrincessColors.surface, borderRadius: BorderRadius.circular(PrincessRadius.r16)),
                       alignment: Alignment.center,
-                      child: GameIcon(occasion, size: 30, color: o.deep),
+                      child: GameIcon(occasion, size: 28, color: o.deep),
                     ),
-                    const SizedBox(width: PrincessSpace.s12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(when.toUpperCase(), style: PrincessText.kicker.copyWith(color: o.deep)),
-                          Text(o.label, style: PrincessText.occasion, overflow: TextOverflow.ellipsis),
+                          Text(when.toUpperCase(), style: PrincessText.kicker.copyWith(color: o.deep), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          // Long names like "Playground" shrink to fit narrow cards instead of being cut off.
+                          FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(o.label, style: PrincessText.occasion)),
                           Row(children: [for (var i = 0; i < 3; i++) StarIcon(filled: i < stars, size: 18)]),
                         ],
                       ),

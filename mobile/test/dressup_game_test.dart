@@ -73,22 +73,53 @@ void main() {
   });
 
   group('day plan', () {
-    test('weekdays follow the lesson timetable', () {
-      expect(dayPlan(DateTime(2026, 10, 27)), ['school', 'sports', 'bedtime']);
-      expect(dayPlan(DateTime(2026, 10, 28)), ['school', 'ballet', 'bedtime']);
-      expect(dayPlan(DateTime(2026, 10, 29)), ['school', 'swimming', 'bedtime']);
+    test('weekdays have school, playground, park, kitchen and bed, plus lessons', () {
+      expect(dayPlan(DateTime(2026, 10, 26)), ['school', 'playground', 'park', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 10, 27)), ['school', 'sports', 'playground', 'park', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 10, 28)), ['school', 'ballet', 'playground', 'park', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 10, 29)), ['school', 'swimming', 'playground', 'park', 'kitchen', 'bedtime']);
+    });
+
+    test('Friday night is a sleepover', () {
+      expect(dayPlan(DateTime(2026, 10, 30)), ['school', 'playground', 'park', 'kitchen', 'sleepover']);
     });
 
     test('weather changes outdoor play', () {
-      expect(dayPlan(DateTime(2026, 10, 26), weather: WeatherKind.snow), ['school', 'snowplay', 'bedtime']);
-      expect(dayPlan(DateTime(2026, 11, 7), weather: WeatherKind.hot), ['beach', 'party', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 10, 26), weather: WeatherKind.snow), ['school', 'playground', 'snowplay', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 11, 7), weather: WeatherKind.hot), ['beach', 'playground', 'party', 'kitchen', 'bedtime']);
     });
 
-    test('special days take the afternoon', () {
-      expect(dayPlan(DateTime(2026, 10, 31)), ['park', 'halloween', 'bedtime']);
-      expect(dayPlan(DateTime(2026, 12, 25)), ['school', 'christmas', 'bedtime']);
-      expect(dayPlan(DateTime(2026, 11, 3), birthday: const MonthDay(11, 3)), ['school', 'birthday', 'bedtime']);
-      expect(dayPlan(DateTime(2026, 11, 4), specials: {'2026-11-04': 'party'}), ['school', 'party', 'bedtime']);
+    test('special days take the slot before dinner, and a sleepover takes the night', () {
+      expect(dayPlan(DateTime(2026, 10, 31)), ['park', 'playground', 'halloween', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 12, 25)), ['school', 'playground', 'christmas', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 11, 2), birthday: const MonthDay(11, 2)), ['school', 'playground', 'birthday', 'kitchen', 'bedtime']);
+      expect(dayPlan(DateTime(2026, 11, 4), specials: {'2026-11-04': 'sleepover'}).last, 'sleepover');
+    });
+
+    test('every day has a label for each outfit', () {
+      for (var d = 0; d < 14; d++) {
+        final plan = dayPlan(DateTime(2026, 11, 1 + d));
+        expect(timesOfDay(plan.length).length, plan.length);
+      }
+    });
+  });
+
+  group('new occasions', () {
+    test('the kitchen needs an apron', () {
+      final clothes = {'top': 'tee', 'bottom': 'jeans', 'shoes': 'slippers'};
+      expect(judge(clothes, 'kitchen').message, 'I need an apron so I don’t get messy!');
+      expect(judge({...clothes, 'coat': 'apron', 'hat': 'chefhat'}, 'kitchen').stars, 3);
+    });
+
+    test('a sleepover needs a sleeping bag', () {
+      final pjs = {'dress': 'pajamas', 'shoes': 'slippers'};
+      expect(judge(pjs, 'sleepover').message, 'Don’t forget my sleeping bag!');
+      expect(judge({...pjs, 'extra': 'sleepingbag'}, 'sleepover').stars, 3);
+    });
+
+    test('playground clothes', () {
+      expect(judge({'dress': 'overalls', 'shoes': 'sneakers', 'hat': 'cap'}, 'playground').stars, 3);
+      expect(judge({'dress': 'partydress', 'shoes': 'sneakers'}, 'playground').stars, 1);
     });
   });
 

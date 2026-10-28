@@ -10,8 +10,8 @@ import 'dressup_weather.dart';
 /// One day's three outfits, its weather and the best stars earned for each.
 class DayRecord {
   DayRecord({required this.plan, this.weather = DayWeather.unknown, List<int>? stars, List<Outfit>? outfits, this.done = false})
-      : stars = stars ?? [0, 0, 0],
-        outfits = outfits ?? [{}, {}, {}];
+      : stars = stars ?? List.filled(plan.length, 0),
+        outfits = outfits ?? [for (final _ in plan) <String, String>{}];
 
   final List<String> plan;
   final DayWeather weather;
@@ -27,12 +27,14 @@ class DayRecord {
     if (json is! Map) return null;
     try {
       final plan = List<String>.from(json['plan'] as List);
-      if (plan.length != 3 || !plan.every(kOccasions.containsKey)) return null;
+      final stars = List<int>.from(json['stars'] as List);
+      final outfits = (json['outfits'] as List).map((o) => Map<String, String>.from(o as Map)).toList();
+      if (plan.isEmpty || !plan.every(kOccasions.containsKey) || stars.length != plan.length || outfits.length != plan.length) return null;
       return DayRecord(
         plan: plan,
         weather: DayWeather.fromJson(json['weather']),
-        stars: List<int>.from(json['stars'] as List),
-        outfits: (json['outfits'] as List).map((o) => Map<String, String>.from(o as Map)).toList(),
+        stars: stars,
+        outfits: outfits,
         done: json['done'] == true,
       );
     } catch (_) {
@@ -118,14 +120,19 @@ class DressUpProgress extends ChangeNotifier {
     final weather = weatherFor(date);
     final plan = dayPlan(date, weather: weather.kind, birthday: birthday, specials: specials);
     final existing = _days[k];
-    if (existing != null && (existing.started || (listEquals(existing.plan, plan) && existing.weather.kind == weather.kind))) {
+    // A day saved before days had 5-6 outfits is upgraded even after play has started.
+    final oldFormat = existing != null && existing.plan.length == 3;
+    if (existing != null && !oldFormat && (existing.started || (listEquals(existing.plan, plan) && existing.weather.kind == weather.kind))) {
       return existing;
     }
-    final outfits = [
-      for (var i = 0; i < 3; i++)
-        existing != null && existing.plan[i] == plan[i] ? existing.outfits[i] : <String, String>{},
-    ];
-    return _days[k] = DayRecord(plan: plan, weather: weather, outfits: outfits);
+    // Keep outfits and stars for any occasion that is still in the new plan.
+    int? was(String o) => existing == null || !existing.plan.contains(o) ? null : existing.plan.indexOf(o);
+    return _days[k] = DayRecord(
+      plan: plan,
+      weather: existing != null && existing.started ? existing.weather : weather,
+      outfits: [for (final o in plan) was(o) != null ? existing!.outfits[was(o)!] : <String, String>{}],
+      stars: [for (final o in plan) was(o) != null ? existing!.stars[was(o)!] : 0],
+    );
   }
 
   int streak(DateTime today) {

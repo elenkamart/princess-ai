@@ -19,7 +19,6 @@ class DressUpCalendar extends StatefulWidget {
 }
 
 class _DressUpCalendarState extends State<DressUpCalendar> {
-  static const _when = ['Morning', 'Afternoon', 'Evening'];
   late DateTime _month = DateTime(widget.today.year, widget.today.month);
   late DateTime _selected = DateTime(widget.today.year, widget.today.month, widget.today.day);
 
@@ -196,7 +195,7 @@ class _DressUpCalendarState extends State<DressUpCalendar> {
             ],
           ),
           const SizedBox(height: PrincessSpace.s12),
-          for (var i = 0; i < 3; i++)
+          for (var i = 0; i < plan.length; i++)
             Padding(
               padding: const EdgeInsets.only(bottom: PrincessSpace.s8),
               child: Container(
@@ -210,7 +209,7 @@ class _DressUpCalendarState extends State<DressUpCalendar> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_when[i].toUpperCase(), style: PrincessText.kicker.copyWith(color: occasionStyle(plan[i]).deep)),
+                          Text(timesOfDay(plan.length)[i].toUpperCase(), style: PrincessText.kicker.copyWith(color: occasionStyle(plan[i]).deep)),
                           Text(kOccasions[plan[i]]!.name, style: PrincessText.occasion.copyWith(color: PrincessColors.ink)),
                         ],
                       ),
